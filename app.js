@@ -71,10 +71,20 @@
   // --------------------------------------------------
   const mobileCta = doc.querySelector('[data-mobile-cta]');
   if (mobileCta && applySection && 'IntersectionObserver' in window) {
+    let applyVisible = false;
+    const syncMobileCta = () => {
+      const beforeDecisionPoint = window.scrollY < window.innerHeight * 0.62;
+      mobileCta.classList.toggle('is-hidden', beforeDecisionPoint || applyVisible);
+    };
     const ctaObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => mobileCta.classList.toggle('is-hidden', entry.isIntersecting));
+      entries.forEach((entry) => {
+        applyVisible = entry.isIntersecting;
+        syncMobileCta();
+      });
     }, { threshold: 0.18 });
     ctaObserver.observe(applySection);
+    syncMobileCta();
+    window.addEventListener('scroll', syncMobileCta, { passive: true });
   }
 
   // --------------------------------------------------
@@ -89,17 +99,33 @@
     const submitBtn = form.querySelector('[data-submit-form]');
     const label = doc.querySelector('[data-step-label]');
     const title = doc.querySelector('[data-step-title]');
+    const copy = doc.querySelector('[data-step-copy]');
     const progress = doc.querySelector('[data-progress-bar]');
     const error = doc.querySelector('[data-form-error]');
     const titles = ['Kontakt', 'Situation', 'Ziel & Zustimmung'];
+    const stepCopy = [
+      'Damit wir dich für die Terminabstimmung erreichen.',
+      'Kurze Qualifikation: Wir prüfen, ob das Mentoring zu deiner Ausgangslage passt.',
+      'Sag uns, was sich konkret ändern soll. Danach senden wir deine Anfrage ab.'
+    ];
     let current = 0;
 
     const activeFields = () => [...steps[current].querySelectorAll('input, select, textarea')];
+    const clearInvalid = (field) => {
+      field.classList.remove('is-invalid');
+      field.closest('label')?.classList.remove('is-invalid');
+    };
+
+    [...form.querySelectorAll('input, select, textarea')].forEach((field) => {
+      field.addEventListener('input', () => clearInvalid(field));
+      field.addEventListener('change', () => clearInvalid(field));
+    });
 
     const updateStep = () => {
       steps.forEach((step, index) => step.classList.toggle('is-active', index === current));
       if (label) label.textContent = `Schritt ${current + 1} von ${steps.length}`;
       if (title) title.textContent = titles[current] || 'Bewerbung';
+      if (copy) copy.textContent = stepCopy[current] || '';
       if (progress) progress.style.width = `${((current + 1) / steps.length) * 100}%`;
       if (prevBtn) prevBtn.style.visibility = current === 0 ? 'hidden' : 'visible';
       if (nextBtn) nextBtn.style.display = current === steps.length - 1 ? 'none' : 'inline-flex';
@@ -111,7 +137,10 @@
     const validateCurrent = () => {
       const fields = activeFields();
       for (const field of fields) {
+        clearInvalid(field);
         if (!field.checkValidity()) {
+          field.classList.add('is-invalid');
+          field.closest('label')?.classList.add('is-invalid');
           if (error) {
             error.textContent = field.type === 'checkbox'
               ? 'Bitte bestätige den Risikohinweis und die Kontaktaufnahme.'
