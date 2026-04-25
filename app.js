@@ -173,12 +173,14 @@
     const copy = leadModal.querySelector('[data-lead-copy]');
     const progress = leadModal.querySelector('[data-lead-progress]');
     const error = leadModal.querySelector('[data-lead-error]');
-    const titles = ['Wo stehst du gerade?', 'Wie viel Kapital planst du?', 'Was bremst dich?', 'Wohin sollen wir dich kontaktieren?'];
+    const titles = ['Wo stehst du gerade?', 'Wie viel Kapital planst du?', 'Was bremst dich?', 'Wie viel Zeit hast du?', 'Wohin sollen wir dich kontaktieren?', 'Was soll sich ändern?'];
     const descriptions = [
       'Wähle aus, was deine aktuelle Situation am besten beschreibt.',
       'Das hilft uns einzuschätzen, ob Risiko- und Mentoring-Rahmen passen.',
       'Trading scheitert meistens an Struktur, Risiko oder Ausführung. Was ist bei dir am stärksten?',
-      'Deine Angaben werden nur zur persönlichen Terminabstimmung genutzt.'
+      'Realistische Umsetzung zählt mehr als Motivation. Wähle dein echtes Wochenbudget.',
+      'Deine Angaben werden nur zur persönlichen Terminabstimmung genutzt.',
+      'Ein Satz reicht. So sehen wir direkt, ob ein Strategiegespräch sinnvoll ist.'
     ];
     let current = 0;
 
@@ -227,6 +229,7 @@
       if (requiredGroup && !requiredGroup.querySelector('input:checked')) {
         requiredGroup.classList.add('is-invalid');
         if (error) error.textContent = 'Bitte wähle eine Option aus.';
+        requiredGroup.querySelector('input')?.focus({ preventScroll: true });
         return false;
       }
       const fields = [...(active?.querySelectorAll('input, select, textarea') || [])];
@@ -238,7 +241,7 @@
               ? 'Bitte bestätige den Risikohinweis und die Kontaktaufnahme.'
               : 'Bitte fülle die markierten Felder aus.';
           }
-          field.reportValidity();
+          field.focus({ preventScroll: true });
           return false;
         }
       }

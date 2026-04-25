@@ -650,7 +650,7 @@
       <button class="lead-close" type="button" data-lead-close aria-label="Bewerbung schließen">×</button>
       <div class="lead-progress" aria-hidden="true"><span data-lead-progress></span></div>
       <div class="lead-head">
-        <span data-lead-step-label>Schritt 1 von 4</span>
+        <span data-lead-step-label>Schritt 1 von 6</span>
         <h2 id="lead-modal-title" data-lead-title>Wo stehst du gerade?</h2>
         <p data-lead-copy>Wähle aus, was deine aktuelle Situation am besten beschreibt.</p>
       </div>
@@ -682,19 +682,18 @@
             <label><input type="radio" name="blocker" value="FOMO oder Revenge-Trading" /><span>FOMO oder Revenge-Trading</span></label>
             <label><input type="radio" name="blocker" value="Prop-Firm Vorbereitung" /><span>Prop-Firm Vorbereitung</span></label>
           </div>
-          <label class="lead-field">
-            <span>Zeit pro Woche</span>
-            <select required name="weekly_time">
-              <option value="">Bitte wählen</option>
-              <option>unter 5 Stunden</option>
-              <option>5-10 Stunden</option>
-              <option>10-15 Stunden</option>
-              <option>15+ Stunden</option>
-            </select>
-          </label>
         </fieldset>
 
         <fieldset class="lead-step" data-lead-step="3">
+          <div class="lead-options" data-lead-required>
+            <label><input type="radio" name="weekly_time" value="unter 5 Stunden" required /><span>unter 5 Stunden</span></label>
+            <label><input type="radio" name="weekly_time" value="5-10 Stunden" /><span>5-10 Stunden</span></label>
+            <label><input type="radio" name="weekly_time" value="10-15 Stunden" /><span>10-15 Stunden</span></label>
+            <label><input type="radio" name="weekly_time" value="15+ Stunden" /><span>15+ Stunden</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="lead-step" data-lead-step="4">
           <label class="lead-field">
             <span>Vorname</span>
             <input required name="first_name" autocomplete="given-name" placeholder="Max" />
@@ -707,6 +706,9 @@
             <span>Telefon / WhatsApp</span>
             <input required type="tel" name="phone" autocomplete="tel" placeholder="+49 ..." />
           </label>
+        </fieldset>
+
+        <fieldset class="lead-step" data-lead-step="5">
           <label class="lead-field">
             <span>Was ist dein Ziel?</span>
             <textarea required name="goal" rows="3" placeholder="Klares System, Risikomanagement, Prop-Firm, zweites Einkommen ..."></textarea>
