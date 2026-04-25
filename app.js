@@ -35,17 +35,38 @@
   window.addEventListener('scroll', setHeader, { passive: true });
 
   // --------------------------------------------------
-  // Smooth funnel scroll
+  // Lead modal launcher with application-section fallback
   // --------------------------------------------------
   const applySection = doc.getElementById('bewerbung');
-  doc.querySelectorAll('.js-scroll-apply').forEach((button) => {
-    button.addEventListener('click', () => {
+  const leadModal = doc.querySelector('[data-lead-modal]');
+  const openLeadModal = () => {
+    if (!leadModal) {
       applySection?.scrollIntoView({ behavior: prefersReduced ? 'auto' : 'smooth', block: 'start' });
-      window.setTimeout(() => {
-        const first = doc.querySelector('[data-application-form] input:not([type="checkbox"])');
-        first?.focus({ preventScroll: true });
-      }, prefersReduced ? 0 : 700);
-    });
+      return;
+    }
+    leadModal.classList.add('is-open');
+    leadModal.setAttribute('aria-hidden', 'false');
+    doc.body.classList.add('modal-open');
+    doc.dispatchEvent(new CustomEvent('lead-modal-opened'));
+    window.setTimeout(() => leadModal.querySelector('input, button, select, textarea')?.focus({ preventScroll: true }), 40);
+  };
+  const closeLeadModal = () => {
+    if (!leadModal) return;
+    leadModal.classList.remove('is-open');
+    leadModal.setAttribute('aria-hidden', 'true');
+    doc.body.classList.remove('modal-open');
+  };
+  doc.querySelectorAll('.js-scroll-apply').forEach((button) => {
+    button.addEventListener('click', openLeadModal);
+  });
+  doc.querySelectorAll('[data-lead-close]').forEach((button) => {
+    button.addEventListener('click', closeLeadModal);
+  });
+  if (new URLSearchParams(window.location.search).get('lead') === '1') {
+    window.setTimeout(openLeadModal, 120);
+  }
+  window.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && leadModal?.classList.contains('is-open')) closeLeadModal();
   });
 
   // --------------------------------------------------
@@ -135,6 +156,118 @@
     });
 
     syncFunnel();
+  }
+
+  // --------------------------------------------------
+  // Popup lead funnel
+  // --------------------------------------------------
+  const leadForm = doc.querySelector('[data-lead-form]');
+  if (leadForm && leadModal) {
+    const steps = [...leadForm.querySelectorAll('[data-lead-step]')];
+    const prev = leadForm.querySelector('[data-lead-prev]');
+    const next = leadForm.querySelector('[data-lead-next]');
+    const submit = leadForm.querySelector('[data-lead-submit]');
+    const actions = leadForm.querySelector('.lead-actions');
+    const label = leadModal.querySelector('[data-lead-step-label]');
+    const title = leadModal.querySelector('[data-lead-title]');
+    const copy = leadModal.querySelector('[data-lead-copy]');
+    const progress = leadModal.querySelector('[data-lead-progress]');
+    const error = leadModal.querySelector('[data-lead-error]');
+    const titles = ['Wo stehst du gerade?', 'Wie viel Kapital planst du?', 'Was bremst dich?', 'Wohin sollen wir dich kontaktieren?'];
+    const descriptions = [
+      'Wähle aus, was deine aktuelle Situation am besten beschreibt.',
+      'Das hilft uns einzuschätzen, ob Risiko- und Mentoring-Rahmen passen.',
+      'Trading scheitert meistens an Struktur, Risiko oder Ausführung. Was ist bei dir am stärksten?',
+      'Deine Angaben werden nur zur persönlichen Terminabstimmung genutzt.'
+    ];
+    let current = 0;
+
+    const clearLeadInvalid = () => {
+      leadForm.querySelectorAll('.is-invalid').forEach((item) => item.classList.remove('is-invalid'));
+      if (error) error.textContent = '';
+    };
+
+    leadForm.querySelectorAll('input, select, textarea').forEach((field) => {
+      field.addEventListener('input', clearLeadInvalid);
+      field.addEventListener('change', () => {
+        clearLeadInvalid();
+        syncLead();
+      });
+    });
+
+    const syncLead = () => {
+      steps.forEach((step, index) => step.classList.toggle('is-active', index === current));
+      if (label) label.textContent = `Schritt ${current + 1} von ${steps.length}`;
+      if (title) title.textContent = titles[current] || 'Bewerbung';
+      if (copy) copy.textContent = descriptions[current] || '';
+      if (progress) progress.style.width = `${((current + 1) / steps.length) * 100}%`;
+      actions?.classList.toggle('is-first', current === 0);
+      if (prev) prev.style.display = current === 0 ? 'none' : 'inline-flex';
+      if (next) {
+        const requiredGroup = steps[current]?.querySelector('[data-lead-required]');
+        next.disabled = !!requiredGroup && !requiredGroup.querySelector('input:checked');
+        next.style.display = current === steps.length - 1 ? 'none' : 'inline-flex';
+      }
+      if (submit) submit.style.display = current === steps.length - 1 ? 'inline-flex' : 'none';
+      clearLeadInvalid();
+      window.setTimeout(() => steps[current]?.querySelector('input, select, textarea, button')?.focus({ preventScroll: true }), 50);
+    };
+
+    const resetLead = () => {
+      if (!leadModal.classList.contains('is-success')) return;
+      leadModal.classList.remove('is-success');
+      leadForm.reset();
+      current = 0;
+      syncLead();
+    };
+
+    const validateLeadStep = () => {
+      const active = steps[current];
+      const requiredGroup = active?.querySelector('[data-lead-required]');
+      if (requiredGroup && !requiredGroup.querySelector('input:checked')) {
+        requiredGroup.classList.add('is-invalid');
+        if (error) error.textContent = 'Bitte wähle eine Option aus.';
+        return false;
+      }
+      const fields = [...(active?.querySelectorAll('input, select, textarea') || [])];
+      for (const field of fields) {
+        if (!field.checkValidity()) {
+          field.closest('.lead-field, .lead-consent')?.classList.add('is-invalid');
+          if (error) {
+            error.textContent = field.type === 'checkbox'
+              ? 'Bitte bestätige den Risikohinweis und die Kontaktaufnahme.'
+              : 'Bitte fülle die markierten Felder aus.';
+          }
+          field.reportValidity();
+          return false;
+        }
+      }
+      return true;
+    };
+
+    next?.addEventListener('click', () => {
+      if (!validateLeadStep()) return;
+      current = Math.min(current + 1, steps.length - 1);
+      syncLead();
+    });
+
+    prev?.addEventListener('click', () => {
+      current = Math.max(current - 1, 0);
+      syncLead();
+    });
+
+    leadForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      if (!validateLeadStep()) return;
+      leadModal.classList.add('is-success');
+      if (label) label.textContent = 'Anfrage erhalten';
+      if (title) title.textContent = 'Danke. Wir prüfen deine Angaben.';
+      if (copy) copy.textContent = 'Kein automatischer Verkaufscall. Wir melden uns persönlich.';
+    });
+
+    doc.addEventListener('lead-modal-opened', resetLead);
+
+    syncLead();
   }
 
   // --------------------------------------------------

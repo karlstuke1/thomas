@@ -644,6 +644,89 @@
     </button>
   </div>
 
+  <div class="lead-modal" data-lead-modal aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="lead-modal-title">
+    <div class="lead-backdrop" data-lead-close></div>
+    <div class="lead-sheet" role="document">
+      <button class="lead-close" type="button" data-lead-close aria-label="Bewerbung schließen">×</button>
+      <div class="lead-progress" aria-hidden="true"><span data-lead-progress></span></div>
+      <div class="lead-head">
+        <span data-lead-step-label>Schritt 1 von 4</span>
+        <h2 id="lead-modal-title" data-lead-title>Wo stehst du gerade?</h2>
+        <p data-lead-copy>Wähle aus, was deine aktuelle Situation am besten beschreibt.</p>
+      </div>
+
+      <form class="lead-form" data-lead-form novalidate>
+        <fieldset class="lead-step is-active" data-lead-step="0">
+          <div class="lead-options" data-lead-required>
+            <label><input type="radio" name="experience" value="Einsteiger ohne Erfahrung" required /><span>Einsteiger ohne Erfahrung</span></label>
+            <label><input type="radio" name="experience" value="Erste Trades, noch kein System" /><span>Erste Trades, noch kein System</span></label>
+            <label><input type="radio" name="experience" value="Aktiv, aber nicht konstant" /><span>Aktiv, aber nicht konstant</span></label>
+            <label><input type="radio" name="experience" value="Fortgeschritten, suche Optimierung" /><span>Fortgeschritten, suche Optimierung</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="lead-step" data-lead-step="1">
+          <div class="lead-options" data-lead-required>
+            <label><input type="radio" name="capital" value="unter 1.000 €" required /><span>unter 1.000 €</span></label>
+            <label><input type="radio" name="capital" value="1.000-2.000 €" /><span>1.000-2.000 €</span></label>
+            <label><input type="radio" name="capital" value="2.000-5.000 €" /><span>2.000-5.000 €</span></label>
+            <label><input type="radio" name="capital" value="5.000-10.000 €" /><span>5.000-10.000 €</span></label>
+            <label><input type="radio" name="capital" value="10.000 €+" /><span>10.000 €+</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="lead-step" data-lead-step="2">
+          <div class="lead-options" data-lead-required>
+            <label><input type="radio" name="blocker" value="Kein klares Setup" required /><span>Kein klares Setup</span></label>
+            <label><input type="radio" name="blocker" value="Risiko außer Kontrolle" /><span>Risiko außer Kontrolle</span></label>
+            <label><input type="radio" name="blocker" value="FOMO oder Revenge-Trading" /><span>FOMO oder Revenge-Trading</span></label>
+            <label><input type="radio" name="blocker" value="Prop-Firm Vorbereitung" /><span>Prop-Firm Vorbereitung</span></label>
+          </div>
+          <label class="lead-field">
+            <span>Zeit pro Woche</span>
+            <select required name="weekly_time">
+              <option value="">Bitte wählen</option>
+              <option>unter 5 Stunden</option>
+              <option>5-10 Stunden</option>
+              <option>10-15 Stunden</option>
+              <option>15+ Stunden</option>
+            </select>
+          </label>
+        </fieldset>
+
+        <fieldset class="lead-step" data-lead-step="3">
+          <label class="lead-field">
+            <span>Vorname</span>
+            <input required name="first_name" autocomplete="given-name" placeholder="Max" />
+          </label>
+          <label class="lead-field">
+            <span>E-Mail</span>
+            <input required type="email" name="email" autocomplete="email" placeholder="max@beispiel.de" />
+          </label>
+          <label class="lead-field">
+            <span>Telefon / WhatsApp</span>
+            <input required type="tel" name="phone" autocomplete="tel" placeholder="+49 ..." />
+          </label>
+          <label class="lead-field">
+            <span>Was ist dein Ziel?</span>
+            <textarea required name="goal" rows="3" placeholder="Klares System, Risikomanagement, Prop-Firm, zweites Einkommen ..."></textarea>
+          </label>
+          <label class="lead-consent">
+            <input required type="checkbox" name="consent" />
+            <span>Ich stimme zu, zur Terminabstimmung kontaktiert zu werden. Mir ist bewusst, dass Trading Risiken bis zum Totalverlust beinhaltet.</span>
+          </label>
+        </fieldset>
+
+        <p class="lead-error" data-lead-error role="alert" aria-live="polite"></p>
+        <div class="lead-actions">
+          <button type="button" class="lead-prev" data-lead-prev>Zurück</button>
+          <button type="button" class="lead-next" data-lead-next>Weiter</button>
+          <button type="submit" class="lead-next lead-submit" data-lead-submit>Anfrage senden</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script async src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js" onload="window.dispatchEvent(new Event('tw-three-ready'))"></script>
   <script defer src="app.js"></script>
 </body>
