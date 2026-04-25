@@ -88,6 +88,56 @@
   }
 
   // --------------------------------------------------
+  // Mobile app-style qualification funnel
+  // --------------------------------------------------
+  const mobileFunnel = doc.querySelector('[data-mobile-funnel]');
+  if (mobileFunnel) {
+    const steps = [...mobileFunnel.querySelectorAll('[data-funnel-step]')];
+    const progressDots = [...mobileFunnel.querySelectorAll('.mobile-funnel-progress span')];
+    const next = mobileFunnel.querySelector('[data-funnel-next]');
+    const back = mobileFunnel.querySelector('[data-funnel-back]');
+    const result = mobileFunnel.querySelector('[data-funnel-result]');
+    const answers = new Array(steps.length).fill('');
+    let current = 0;
+
+    const syncFunnel = () => {
+      const isResult = current >= steps.length;
+      mobileFunnel.classList.toggle('is-result', isResult);
+      steps.forEach((step, index) => step.classList.toggle('is-active', index === current && !isResult));
+      result?.classList.toggle('is-active', isResult);
+      progressDots.forEach((dot, index) => dot.classList.toggle('is-active', index <= Math.min(current, steps.length - 1)));
+      if (back) back.style.visibility = current === 0 ? 'hidden' : 'visible';
+      if (next) {
+        next.disabled = !answers[current] && !isResult;
+        next.textContent = answers[current] ? 'Weiter' : 'Auswahl treffen';
+      }
+    };
+
+    steps.forEach((step, stepIndex) => {
+      step.querySelectorAll('[data-funnel-option]').forEach((option) => {
+        option.addEventListener('click', () => {
+          answers[stepIndex] = option.textContent.trim();
+          step.querySelectorAll('[data-funnel-option]').forEach((item) => item.classList.toggle('is-selected', item === option));
+          syncFunnel();
+        });
+      });
+    });
+
+    next?.addEventListener('click', () => {
+      if (!answers[current]) return;
+      current = Math.min(current + 1, steps.length);
+      syncFunnel();
+    });
+
+    back?.addEventListener('click', () => {
+      current = Math.max(current - 1, 0);
+      syncFunnel();
+    });
+
+    syncFunnel();
+  }
+
+  // --------------------------------------------------
   // Multi-step application form
   // --------------------------------------------------
   const form = doc.querySelector('[data-application-form]');
